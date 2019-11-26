@@ -1,16 +1,47 @@
-import React from 'react'
-import {Small} from './styles'
+import React, {useState, useEffect} from 'react'
+import {Animated} from 'react-native'
+import {Small, Original} from './styles'
 
-export default function LazyImage (
+const OriginalAnimated = Animated.createAnimatedComponent(Original)
+
+export default function LazyImage({
   smallSource,
   source,
-  aspectRatio = 1) {
+  aspectRatio,
+  shouldLoad
+}) {
+  const opacity = new Animated.Value(0)
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    if (shouldLoad) {setTimeout(() => {
+      setLoaded(true)
+    }, 1000)}
+  }, [shouldLoad])
+  function hadleAnimate() {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true
+    }).start()
+  }
   return (
   <Small 
     source={smallSource}
-    aspect={aspectRatio}
+    ratio={aspectRatio}
     resizeMode="contain"
-  />
+    blurRadius={2}
+  >
+    {loaded && <OriginalAnimated
+      style={{opacity}}
+      source={source}
+      ratio={aspectRatio}
+      resizeMode="contain"
+      onLoadEnd={hadleAnimate}
+    /> }
+    
+
+  </Small>
   )    
 }
 
